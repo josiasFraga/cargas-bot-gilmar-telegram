@@ -8,10 +8,10 @@ async function connect(){
 
     //const connection = await mysql.createConnection("mysql://root:@localhost:3306/rentalbot");
     const connection = await mysql.createConnection({
-        host: 'zapshop.com.br',
-        user: 'zapshopc_cargas_express_catcher',
-        database: 'zapshopc_cargas_express_catcher_gilmar',
-        password: 'zap3537shop11'
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        database: process.env.DB_DATABASE,
+        password: process.env.DB_PASSWORD,
     });
     //const connection = await mysql.createConnection("mysql://rentalbot:zap3537shop11@190.102.40.78:3306/rentalbot");
     console.log("Conectou no MySQL!");
