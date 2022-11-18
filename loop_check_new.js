@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+import arrayToCsv from 'arrays-to-csv';
 dotenv.config()
 import { Telegraf } from 'telegraf';
 import * as fs from 'fs';
@@ -55,7 +56,9 @@ setInterval(async () => {
 
             notSended.map((dado_db)=>{
 
-                dados_retornar = dados_retornar.concat(dado_db.dados.filter(async (dado) => {
+                const dado_db_array = JSON.parse(dado_db.dados);
+
+                dados_retornar = dados_retornar.concat(dado_db_array.filter(async (dado) => {
 
                     if ( dado.filial_text && branchs.indexOf(dado.filial_text) > -1 ) {
                         return true;
@@ -77,18 +80,44 @@ setInterval(async () => {
                     if ( dado.status_text != "aguardando abertura" && dado._version && processed_verions.indexOf(dado._version) < 0 ) {
                         return false;
                     }
+
+                    console.log("criando mensagem");
                     processed_verions.push(dado._version);
 
                     let message = dado.filial_text + " - " + dado.fila_text + " - " + dado.status_text + "\n\n";
 
                     const viagens_json = JSON.parse(dado.json_text);
                     const viagens = viagens_json.viagens;
+                    let csv_data = [];
 
+                    let viagem_origens = [];
                     Object.keys(viagens).forEach(function(key, index) {
+
                         message += "Destino: "  + viagens[key].ultimaCidade  + " - (" + formatReal(viagens[key].maiorKm) + "km)" + "\n"; 
                         message += "Valor: R$ " + formatReal(viagens[key].valor) + "\n";
                         message += "Qtd de Veículos: " + formatReal(viagens[key].veiculos) + "\n\n";
+
+                        viagens[key].cargas.map((carga)=>{
+                            if ( viagem_origens.indexOf(carga.org) < 0 ) {
+                                viagem_origens.push(carga.org);
+                            }
+                        });
+
+                        csv_data.push({
+                            "ORIGENS": viagem_origens.join("/"),
+                            "DESTINO": viagens[key].ultimaCidade,
+                            "VALOR": "R$ " + formatReal(viagens[key].valor),
+                            "QUANTIDADE": formatReal(viagens[key].veiculos),
+                        });
                     });
+
+                    let csvGenerator = new arrayToCsv(csv_data, { delimiter: ',', quote: '"' });
+                    csvGenerator.saveFile('./viagens.csv');
+
+                    await bot.telegram.sendDocument(process.env.CHAT_GILMAR, {
+                        source: fs.createReadStream('./viagens.csv'),
+                        filename: 'viagens.csv'
+                     },{ caption: "Se liga bicho!" }).catch(function(error){ console.log(error); })
 
                     message +=  "\n\n";
 
@@ -96,18 +125,13 @@ setInterval(async () => {
                     ids.map(async (chat_id) => {
                         if ( id_sended.indexOf(chat_id.id) < 0 ) {
                             id_sended.push(chat_id.id);
-                           await bot.telegram.sendMessage(chat_id.id, message);
+                            await bot.telegram.sendMessage(chat_id.id, message);
                         }
                     })
                     await sleep(1000);
                 })
 
             }
-
-            //console.log(dados_retornar);
-            //notSended.forEach(async (el, index) => {
-                //console.log(el);
-            //})
         }
         console.log('FINALIZANDO PROCESSO...');
     } catch (e) {
