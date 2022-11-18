@@ -22,7 +22,7 @@ async function connect(){
 
 export async function findNotSended() {
     const conn = await connect();
-    const query = conn.query('SELECT * FROM dados WHERE telegram_aviso_enviado = "N" AND dados LIKE "%custom.chamada_object%" ORDER BY id ASC');
+    const query = conn.query('SELECT * FROM dados WHERE telegram_aviso_enviado = "N" AND dados LIKE "%custom.chamada_object%" AND dados LIKE "%aguardando abertura%" ORDER BY id ASC');
     const rows = await query;
     return rows[0];
 }

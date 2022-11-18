@@ -44,6 +44,7 @@ function sleep(ms) {
     });
   }
 
+let processed_verions = [];
 setInterval(async () => {
     try{
         console.log('INICIANDO PROCESSO...');
@@ -73,9 +74,10 @@ setInterval(async () => {
 
                 dados_retornar.map(async (dado)=>{
 
-                    if ( dado.status_text != "aguardando abertura" ) {
+                    if ( dado.status_text != "aguardando abertura" && dado._version && processed_verions.indexOf(dado._version) < 0 ) {
                         return false;
                     }
+                    processed_verions.push(dado._version);
 
                     let message = dado.filial_text + " - " + dado.fila_text + " - " + dado.status_text + "\n\n";
 
