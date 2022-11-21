@@ -56,7 +56,7 @@ setInterval(async () => {
 
             notSended.map((dado_db)=>{
 
-                const dado_db_array = JSON.parse(dado_db.dados);
+                const dado_db_array = dado_db.dados;
 
                 dados_retornar = dados_retornar.concat(dado_db_array.filter(async (dado) => {
 
@@ -86,7 +86,7 @@ setInterval(async () => {
 
                     let message = dado.filial_text + " - " + dado.fila_text + " - " + dado.status_text + "\n\n";
 
-                    const viagens_json = JSON.parse(dado.json_text);
+                    const viagens_json = dado.json_text;
                     const viagens = viagens_json.viagens;
                     let csv_data = [];
 
