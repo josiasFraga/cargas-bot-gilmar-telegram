@@ -86,7 +86,7 @@ setInterval(async () => {
 
                     let message = dado.filial_text + " - " + dado.fila_text + " - " + dado.status_text + "\n\n";
 
-                    const viagens_json = dado.json_text;
+                    const viagens_json = JSON.parse(dado.json_text);
                     const viagens = viagens_json.viagens;
                     let csv_data = [];
 
